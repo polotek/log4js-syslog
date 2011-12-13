@@ -39,9 +39,15 @@ function open(config) {
 function syslogAppender (config) {
 	open(config);
   return function(loggingEvent) {
-		var level = getSyslogLevel(loggingEvent.level);
+		var level = getSyslogLevel(loggingEvent.level)
+			, data = loggingEvent.data
+			, layout
+
 	  if(level) {
-		  syslog.log(level, loggingEvent.data);
+	  	layout = config && config.layout ? config.layout : layouts.basicLayout; 
+			data = layout(loggingEvent);
+
+		  syslog.log(level, data);
 		}
   };
 }
