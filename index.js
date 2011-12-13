@@ -52,7 +52,7 @@ function syslogAppender (config) {
 			, layout
 
 	  if(level) {
-	  	layout = config && config.layout ? config.layout : layouts.basicLayout; 
+	  	layout = config && config.layout ? config.layout : log4js.layouts.basicLayout; 
 			data = layout(loggingEvent);
 
 		  syslog.log(level, data);
