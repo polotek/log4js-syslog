@@ -29,8 +29,16 @@ function open(config) {
 	config = config || {}
 
 	var name = (config.ident || config.name || 'node-syslog') + ''
-		, optsVal = config.flags ? getOptions(config.flags) : (syslog.LOG_PID | syslog.LOG_CONS | syslog.LOG_ODELAY)
-		, facility = config.facility || syslog.LOG_USER;
+		, optsVal = (syslog.LOG_PID | syslog.LOG_CONS | syslog.LOG_ODELAY)
+		, facility = syslog.LOG_LOCAL0;
+
+	if(config.flags) {
+		optsVal = getOptions(config.flags);
+	}
+
+	if(config.facility && syslog[config.facility]) {
+		facility = syslog[config.facility];
+	}
 
 	// no need to check if it's already open, the lib does that
 	syslog.init(name, optsVal, facility);
