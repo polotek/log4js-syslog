@@ -2,7 +2,7 @@
 	"name": "log4js-syslog"
 	, "description": "A log4js appender for writing to syslog"
 	, "author": "Marco Rogers (polotek)"
-	, "version": "0.0.1"
+	, "version": "0.1.0"
 	, "bugs": { "url": "https://github.com/polotek/log4js-syslog" }
 	, "repository": {
 		"type": "git"
