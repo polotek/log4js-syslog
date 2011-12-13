@@ -1,15 +1,15 @@
 var log4js = require('log4js')
-	, layouts = log4js.layouts
 	, syslog = require('node-syslog');
 
 
 var levels = {}
+levels[log4js.levels.ALL] = syslog.LOG_DEBUG;
+levels[log4js.levels.TRACE] = syslog.LOG_DEBUG;
 levels[log4js.levels.DEBUG] = syslog.LOG_DEBUG;
 levels[log4js.levels.INFO] = syslog.LOG_INFO;
 levels[log4js.levels.WARN] = syslog.LOG_WARNING;
-levels[log4js.levels.ERROR] = syslog.LOG_ERROR;
+levels[log4js.levels.ERROR] = syslog.LOG_ERR;
 levels[log4js.levels.FATAL] = syslog.LOG_CRIT;
-levels[log4js.levels.TRACE] = syslog.LOG_NOTICE;
 
 function getOptions(flags) {
 	var opts = 0;
@@ -22,7 +22,7 @@ function getOptions(flags) {
 }
 
 function getSyslogLevel(level) {
-	return level && levels[level] ? levels[level] : syslog.LOG_INFO;
+	return level && levels[level] ? levels[level] : null;
 }
 
 function open(config) {
@@ -36,32 +36,21 @@ function open(config) {
 	syslog.init(name, optsVal, facility);
 }
 
-function log(loggingEvent) {
-	var level = getSyslogLevel(loggingEvent.level);
-	//console.log('syslogging', arguments)
-	console._preLog4js_error(loggingEvent);
-  syslog.log(level, loggingEvent.data);
+function syslogAppender (config) {
+	open(config);
+  return function(loggingEvent) {
+		var level = getSyslogLevel(loggingEvent.level);
+	  if(level) {
+		  syslog.log(level, loggingEvent.data);
+		}
+  };
 }
 
-function syslogAppender (layout) {
-    layout = layout || layouts.colouredLayout;
-    return function(loggingEvent) {
-	    log(layout(loggingEvent));
-    };
-}
-
-function configure(config) {
-    var layout;
-    if (config.layout) {
-			layout = layouts.layout(config.layout.type, config.layout);
-    }
-    open(config);
-    return syslogAppender(layout);
-}
-
+// This is a binding so no context needed for close function
 process.on('exit', syslog.close);
 
-open();
 exports.name = "syslog";
 exports.appender = syslogAppender;
-exports.configure = configure;
+exports.configure = open;
+exports.open = open;
+exports.close = syslog.close;
